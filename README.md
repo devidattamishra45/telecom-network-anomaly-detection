@@ -203,24 +203,4 @@ Open your browser at `http://localhost:8501`.
 
 ---
 
-## 9. C-DOT Interview Guide: How to Present This Project
 
-### 30-Second Elevator Pitch
-> *"I built an unsupervised Telecom Network Anomaly Detection System using Isolation Forest. In telecom environments like C-DOT's routers and 4G/5G core, traffic is 99.9% normal, and collecting labeled datasets for real-time faults is impractical. My system trains exclusively on normal baseline traffic to learn healthy behavior across 8 telemetry features—including latency, packet loss, retransmission rates, and CPU utilization. On a held-out test set covering 5 realistic telecom failure modes (such as DDoS spikes, fiber link degradation, and SYN floods), the system achieved a 100% anomaly detection rate with an authentic false alarm rate of just 2.45%. I also developed a Streamlit NOC dashboard that clearly separates the ML prediction from rule-based diagnostic indicators to help network engineers diagnose root causes immediately."*
-
-### Top 5 Interview Questions & Confident Answers
-
-#### Q1: Why did you choose Isolation Forest instead of DBSCAN or Autoencoders?
-- **Answer:** *"DBSCAN relies on pairwise Euclidean distance calculations, which scale as $O(n^2)$ and struggle in higher dimensions due to distance concentration. Autoencoders are powerful but computationally heavy, require GPU acceleration for real-time inference, and are sensitive to hyperparameter tuning. Isolation Forest has an $O(n \log n)$ time complexity, low memory overhead, and isolates outliers near the root of shallow trees. In telecom edge routers, low CPU overhead and sub-millisecond inference are essential."*
-
-#### Q2: Why train only on normal data? Isn't that semi-supervised?
-- **Answer:** *"Yes, this is often referred to as semi-supervised or one-class anomaly detection. In telecom operations, clean normal data is abundant during steady-state operations, whereas anomalies are rare, diverse, and unpredictable. If we trained a supervised classifier on known faults, it would fail to detect novel zero-day attacks or unforeseen physical fiber faults. Training on normal data ensures the model learns the envelope of healthy network behavior."*
-
-#### Q3: How do you handle false positives in a telecom NOC?
-- **Answer:** *"In telecom NOCs, alert fatigue is a major operational risk. If a system triggers 20% false alarms, operators turn off notifications. We control this via the `contamination` parameter and decision offset. By calibrating the decision threshold on normal traffic, we achieved a False Positive Rate of only 2.45% (97.55% specificity), meaning normal traffic passes through with minimal false alarms."*
-
-#### Q4: What are the 'Contributing Diagnostic Indicators' and why are they separated from the model?
-- **Answer:** *"Isolation Forest makes a holistic, multi-dimensional decision—it detects complex joint interactions (e.g., normal throughput combined with abnormal connection counts and small packet sizes). However, operators need actionable root cause hints. Our diagnostic layer computes Z-score standard deviations and percentile deviations for each metric against the normal baseline. We explicitly distinguish this rule-based triage layer from the ML model decision so operators know that the ML model made the anomaly classification, while the diagnostic indicators provide clinical engineering context for triage."*
-
-#### Q5: How would this scale to a real C-DOT 100 Gbps core router?
-- **Answer:** *"At 100 Gbps, inspecting every single packet payload at line rate with software ML is impossible. In production C-DOT architecture, this system would be fed by IPFIX, NetFlow, or sFlow sampled telemetry aggregated in 1-second or 10-second flow windows, or implemented on P4 programmable data planes (FPGA/ASIC) where shallow decision tree logic can be evaluated at hardware line rate."*
